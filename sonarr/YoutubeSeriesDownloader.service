@@ -88,20 +88,6 @@ YoutubeSeriesDownloaderProcess () {
 	        tvdbPageData=$(curl -s "https://thetvdb.com/series/$seriesTvdbTitleSlug/episodes/$episodeId")
 	        downloadUrl=$(echo "$tvdbPageData" | grep -i youtube.com  | grep -i watch | grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*")
 	        
-	        if [ -z $downloadUrl ]; then
-	            network="$(echo "$tvdbPageData" | grep -i "/companies/youtube")"
-	            if [ ! -z "$network" ]; then 
-	                downloadUrl=$(echo "$tvdbPageData" | grep -iws "production code" -A 2 | sed 's/\ //g' | tail -n1)
-	                if [ ! -z $downloadUrl ]; then
-	                    downloadUrl="https://www.youtube.com/watch?v=$downloadUrl"
-	                fi
-	            fi
-	        fi
-	
-	        if [ -z $downloadUrl ]; then
-	            log "$loopCount/$sonarrSeriesTotal :: $currentLoopIteration/$seriesEpisodeTvdbIdsCount :: $seriesTitle :: S${episodeSeasonNumber}E${episodeNumber} :: ERROR :: No Download URL found, skipping"
-	            continue
-	        fi
 	        downloadLocation="/config/temp"
 	        if [ ! -d $downloadLocation ]; then
 	            mkdir $downloadLocation
@@ -110,11 +96,12 @@ YoutubeSeriesDownloaderProcess () {
 	            mkdir $downloadLocation
 	        fi
 	        fileName="$seriesTitleDots.S${episodeSeasonNumber}E${episodeNumber}.WEB-DL-SonarrExtended"
+                episodeAired=$(echo $tvdbPageData | grep -iws "originally aired" -A 1 | tr -d '\n' | sed 's/<\/a><\/span>//' | sed 's/.*>//p')
 	        log "$loopCount/$sonarrSeriesTotal :: $currentLoopIteration/$seriesEpisodeTvdbIdsCount :: $seriesTitle :: S${episodeSeasonNumber}E${episodeNumber} :: Downloading via yt-dlp ($videoFormat)..."
 	        if [ ! -z "$cookiesFile" ]; then
-	            yt-dlp -f "$videoFormat" --no-video-multistreams --cookies "$cookiesFile" -o "$downloadLocation/$fileName" --write-sub --sub-lang $videoLanguages --embed-subs --merge-output-format mkv --no-mtime --geo-bypass $ytdlpExtraOpts "$downloadUrl"  2>&1 | tee -a /config/logs/$scriptName.txt
+	            yt-dlp -f "$videoFormat" --no-video-multistreams --cookies "$cookiesFile" -o "$downloadLocation/$fileName" --write-sub --sub-lang $videoLanguages --embed-subs --merge-output-format mkv --no-mtime --geo-bypass $ytdlpExtraOpts ytsearch:"$seriesTitle $episodeAired" 2>&1 | tee -a /config/logs/$scriptName.txt
 	        else
-	            yt-dlp -f "$videoFormat" --no-video-multistreams -o "$downloadLocation/$fileName" --write-sub --sub-lang $videoLanguages --embed-subs --merge-output-format mkv --no-mtime --geo-bypass $ytdlpExtraOpts "$downloadUrl"  2>&1 | tee -a /config/logs/$scriptName.txt
+	            yt-dlp -f "$videoFormat" --no-video-multistreams -o "$downloadLocation/$fileName" --write-sub --sub-lang $videoLanguages --embed-subs --merge-output-format mkv --no-mtime --geo-bypass $ytdlpExtraOpts ytsearch:"$seriesTitle $episodeAired" 2>&1 | tee -a /config/logs/$scriptName.txt
 	        fi
 	
 	        if python3 /config/extended/sma/manual.py --config "/config/extended/sma.ini" -i "$downloadLocation/$fileName.mkv" -nt; then
