@@ -104,9 +104,10 @@ YoutubeSeriesDownloaderProcess () {
                     network="$(echo "$tvdbPageData" | grep -i "/companies/youtube")"
                     if [ ! -z "$network" ]; then
                         episodeTitle=$(echo $seriesEpisdodeData | jq -r .title)
-                        episodeDate=$(echo $seriesEpisdodeData | jq -r .airDate | sed 's/-//g')
-                        log "TITLE: $episodeTitle | DATE: $episodeDate"
-                        downloadUrl=$(yt-dlp --get-id --date "$episodeDate" "ytsearch:$episodeTitle")
+                        episodeDate=$(echo $seriesEpisdodeData | jq -r .airDate)
+                        episodeDateClean=$(echo "${episodeDate//-}")
+                        log "TITLE: $episodeTitle | DATE: $episodeDateClean"
+                        downloadUrl=$(yt-dlp --get-id --date "$episodeDateClean" "ytsearch:$episodeTitle")
                         log "$downloadUrl"
                         if [ ! -z $downloadUrl ]; then
                             downloadUrl="https://www.youtube.com/watch?v=$downloadUrl"
