@@ -97,6 +97,18 @@ YoutubeSeriesDownloaderProcess () {
 	                fi
 	            fi
 	        fi
+
+                if [ -z $downloadUrl ]; then
+                    network="$(echo "$tvdbPageData" | grep -i "/companies/youtube")"
+                    if [ ! -z "$network" ]; then
+                        episodeTitle=$(echo $seriesEpisdodeData | jq -r .title)
+                        episodeDate=$(echo $seriesEpisdodeData | jq -r .airDate)
+                        downloadUrl=$(yt-dlp --get-id --date "$episodeDate" "ytsearch:$episodeTitle")
+                        if [ ! -z $downloadUrl ]; then
+                            downloadUrl="https://www.youtube.com/watch?v=$downloadUrl"
+                        fi
+                    fi
+                fi
 	
 	        if [ -z $downloadUrl ]; then
 	            log "$loopCount/$sonarrSeriesTotal :: $currentLoopIteration/$seriesEpisodeTvdbIdsCount :: $seriesTitle :: S${episodeSeasonNumber}E${episodeNumber} :: ERROR :: No Download URL found, skipping"
