@@ -80,7 +80,7 @@ curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/sonarr/In
 echo "Done"
 
 echo "Download YoutubeSeriesDownloader service..."
-curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/sonarr/YoutubeSeriesDownloader.service -o /custom-services.d/YoutubeSeriesDownloader
+curl https://raw.githubusercontent.com/chadouming/arr-scripts/main/sonarr/YoutubeSeriesDownloader.service -o /custom-services.d/YoutubeSeriesDownloader
 echo "Done"
 
 mkdir -p /config/extended
