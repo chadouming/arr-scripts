@@ -88,8 +88,8 @@ YoutubeSeriesDownloaderProcess () {
 	        tvdbPageData=$(curl -s "https://thetvdb.com/series/$seriesTvdbTitleSlug/episodes/$episodeId")
 	        downloadUrl=$(echo "$tvdbPageData" | grep -i youtube.com  | grep -i watch | grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*")
 
-                log "No direct download link, searching tvdb"
 	        if [ -z $downloadUrl ]; then
+                    log "No direct download link, searching tvdb"
 	            network="$(echo "$tvdbPageData" | grep -i "/companies/youtube")"
 	            if [ ! -z "$network" ]; then 
 	                downloadUrl=$(echo "$tvdbPageData" | grep -iws "production code" -A 2 | sed 's/\ //g' | tail -n1)
@@ -98,9 +98,10 @@ YoutubeSeriesDownloaderProcess () {
 	                fi
 	            fi
 	        fi
+                log "Download: $downloadUrl"
 
-                log "No direct download link, searching youtube"
                 if [ -z $downloadUrl ]; then
+                    log "No direct download link, searching youtube"
                     network="$(echo "$tvdbPageData" | grep -i "/companies/youtube")"
                     if [ ! -z "$network" ]; then
                         episodeTitle=$(echo $seriesEpisdodeData | jq -r .title)
@@ -115,9 +116,10 @@ YoutubeSeriesDownloaderProcess () {
                         fi
                     fi
                 fi
+                log "Download: $downloadUrl"
 
-                log "Couldn't find a video on that date. Last resort."
                 if [ -z $downloadUrl ]; then
+                    log "Couldn't find a video on that date. Last resort."
                     network="$(echo "$tvdbPageData" | grep -i "/companies/youtube")"
                     if [ ! -z "$network" ]; then
                         episodeTitle=$(echo $seriesEpisdodeData | jq -r .title)
@@ -130,6 +132,7 @@ YoutubeSeriesDownloaderProcess () {
                         fi
                     fi
                 fi
+                log "Download: $downloadUrl"
 	
 	        if [ -z $downloadUrl ]; then
 	            log "$loopCount/$sonarrSeriesTotal :: $currentLoopIteration/$seriesEpisodeTvdbIdsCount :: $seriesTitle :: S${episodeSeasonNumber}E${episodeNumber} :: ERROR :: No Download URL found, skipping"
