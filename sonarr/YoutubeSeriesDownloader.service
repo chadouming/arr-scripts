@@ -108,7 +108,11 @@ YoutubeSeriesDownloaderProcess () {
                         episodeDate=$(echo $seriesEpisdodeData | jq -r .airDate)
                         episodeDateClean=$(echo "${episodeDate//-}")
                         log "TITLE: $episodeTitle | DATE: $episodeDateClean"
-                        downloadUrl=$(yt-dlp --get-id --date "$episodeDateClean" "ytsearch:$episodeTitle")
+                        if [ ! -z "$cookiesFile" ]; then
+                            downloadUrl=$(yt-dlp --cookies "$cookiesFile" --get-id --date "$episodeDateClean" "ytsearch:$episodeTitle")
+                        else
+                            downloadUrl=$(yt-dlp --cookies "$cookiesFile" --get-id --date "$episodeDateClean" "ytsearch:$episodeTitle")
+                        fi
                         log "$downloadUrl"
                         if [ ! -z $downloadUrl ]; then
                             downloadUrl="https://www.youtube.com/watch?v=$downloadUrl"
@@ -124,7 +128,11 @@ YoutubeSeriesDownloaderProcess () {
                     if [ ! -z "$network" ]; then
                         episodeTitle=$(echo $seriesEpisdodeData | jq -r .title)
                         log "TITLE: $episodeTitle | SERIE: $seriesTitle"
-                        downloadUrl=$(yt-dlp --get-id "ytsearch:$seriesTitle $episodeTitle")
+                        if [ ! -z "$cookiesFile" ]; then
+                            downloadUrl=$(yt-dlp --cookies "$cookiesFile" --get-id "ytsearch:$seriesTitle $episodeTitle")
+                        else
+                            downloadUrl=$(yt-dlp --get-id "ytsearch:$seriesTitle $episodeTitle")
+                        fi
                         log "$downloadUrl"
                         if [ ! -z $downloadUrl ]; then
                             downloadUrl="https://www.youtube.com/watch?v=$downloadUrl"
